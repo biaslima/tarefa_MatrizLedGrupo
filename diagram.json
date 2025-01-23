@@ -6,8 +6,8 @@
     {
       "type": "board-pi-pico-w",
       "id": "pico",
-      "top": -3.25,
-      "left": 32.35,
+      "top": -51.25,
+      "left": 435.55,
       "attrs": { "builder": "pico-sdk" }
     },
     { "type": "wokwi-neopixel", "id": "rgb1", "top": 92.5, "left": -97, "attrs": {} },
@@ -45,18 +45,11 @@
     { "type": "wokwi-vcc", "id": "vcc4", "top": -277.64, "left": -384, "attrs": {} },
     { "type": "wokwi-vcc", "id": "vcc5", "top": -364.04, "left": -48, "attrs": {} },
     { "type": "wokwi-gnd", "id": "gnd5", "top": -268.8, "left": -48.6, "attrs": {} },
-    {
-      "type": "wokwi-pushbutton",
-      "id": "btn1",
-      "top": 15.8,
-      "left": 201.6,
-      "attrs": { "color": "green" }
-    }
+    { "type": "wokwi-membrane-keypad", "id": "keypad1", "top": -386, "left": 82.4, "attrs": {} }
   ],
   "connections": [
     [ "pico:GP0", "$serialMonitor:RX", "", [] ],
     [ "pico:GP1", "$serialMonitor:TX", "", [] ],
-    [ "pico:GP7", "rgb1:DIN", "green", [ "h-54.05", "v-3.25" ] ],
     [ "gnd1:GND", "rgb1:VSS", "black", [ "v0" ] ],
     [ "rgb1:DOUT", "rgb2:DIN", "green", [ "h-19.2", "v-10.5" ] ],
     [ "rgb2:DOUT", "rgb3:DIN", "green", [ "h-19.2", "v-10.5" ] ],
@@ -141,8 +134,15 @@
     [ "rgb23:VSS", "gnd5:GND", "green", [ "v0" ] ],
     [ "rgb24:VSS", "gnd5:GND", "green", [ "v0" ] ],
     [ "rgb25:VSS", "gnd5:GND", "green", [ "v0" ] ],
-    [ "pico:GP6", "btn1:1.l", "green", [ "h-28.8", "v-124.8", "h172.8", "v67.2" ] ],
-    [ "btn1:2.l", "pico:GND.6", "green", [ "h-19.2", "v67.4" ] ]
+    [ "pico:GP11", "rgb1:DIN", "green", [ "h-57.6", "v-48" ] ],
+    [ "keypad1:R1", "pico:GP5", "green", [ "v0" ] ],
+    [ "keypad1:R2", "pico:GP6", "green", [ "v0" ] ],
+    [ "keypad1:R3", "pico:GP7", "green", [ "v0" ] ],
+    [ "keypad1:R4", "pico:GP8", "green", [ "v0" ] ],
+    [ "keypad1:C1", "pico:GP1", "gold", [ "v0" ] ],
+    [ "keypad1:C2", "pico:GP2", "gold", [ "v0" ] ],
+    [ "keypad1:C3", "pico:GP3", "gold", [ "v0" ] ],
+    [ "keypad1:C4", "pico:GP4", "gold", [ "v0" ] ]
   ],
   "dependencies": {}
 }
