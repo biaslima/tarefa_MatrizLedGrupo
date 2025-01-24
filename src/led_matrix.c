@@ -10,9 +10,10 @@
 #define NUM_PIXELS 25
 #define NUM_LEDS 25
 #define MATRIZ_PIN 7
-#define OUT_PIN 7
+#define button 5
 const uint8_t colunas[4] = {1, 2, 3, 4}; // Pinos das colunas
-const uint8_t linhas[4] = {5, 6, 7, 8};  // Pinos das linhas
+const uint8_t linhas[4] = {10, 6, 7, 8};  // Pinos das linhas
+
 
 // Mapeamento das teclas do teclado
     const char teclado[4][4] = 
@@ -34,8 +35,10 @@ void configurar_pino(int pino, bool direcao, bool estado);
 //Rotina da interrupção
 static void gpio_irq_handler(uint gpio, uint32_t events){
     printf("Interrupção ocorreu no pino %d, no evento %d\n", gpio, events);
-    printf("HABILITANDO O MODO GRAVAÇÃO");
-	reset_usb_boot(0,0); //habilita o modo de gravação do microcontrolador
+    
+    // Exemplo: Acender todos os LEDs em azul ao pressionar o botão
+    ligar_leds_azul(pio0, 0);
+	//reset_usb_boot(0,0); //habilita o modo de gravação do microcontrolador
 }
 
 // Define intensidade para os leds RGB
@@ -50,8 +53,9 @@ uint32_t matrix_rgb(double b, double r, double g) {
 // Lógica para utilizar uma matriz de 3 para configurar os desenhos dos LEDS
 void formar_frames(double frame[NUM_LEDS][3], PIO pio, uint sm) {
     for (int i = 0; i < NUM_PIXELS; i++) {
-        uint32_t valor_led = matrix_rgb(frame[i][0], frame[i][1], frame[i][2]); // R, G, B
+        uint32_t valor_led = matrix_rgb(frame[i][0], frame[i][1], frame[i][2]);
         pio_sm_put_blocking(pio, sm, valor_led);
+        printf("LED %d: R=%.2f, G=%.2f, B=%.2f\n", i, frame[i][0], frame[i][1], frame[i][2]);
     }
 }
 
@@ -60,6 +64,45 @@ void gerar_animacao (double animacao[][NUM_LEDS][3], int num_frames, int delay_m
     for (int frame = 0; frame < num_frames; frame++) {
         formar_frames(animacao[frame], pio, sm);
         sleep_ms(delay_ms); // Intervalo entre os quadros
+    }
+}
+//Função para desligar LEDs
+    void desligar_leds(PIO pio, uint sm) {
+    for (int i = 0; i < NUM_PIXELS; i++) {
+        uint32_t valor_led = matrix_rgb(0.0, 0.0, 0.0); 
+        pio_sm_put_blocking(pio, sm, valor_led);
+    }
+}
+
+//Função ligar leds em azul
+void ligar_leds_azul(PIO pio, uint sm) {
+    for (int i = 0; i < NUM_PIXELS; i++) {
+        uint32_t valor_led = matrix_rgb(1.0, 0.0, 0.0);
+        pio_sm_put_blocking(pio, sm, valor_led);
+    }
+}
+
+//Função ligar Leds vermelhos
+void ligar_leds_vermelho(PIO pio, uint sm) {
+    for (int i = 0; i < NUM_PIXELS; i++) {
+        uint32_t valor_led = matrix_rgb(0.0, 0.8, 0.0); 
+        pio_sm_put_blocking(pio, sm, valor_led);
+    }
+}
+
+//Função ligar Leds verdes
+void ligar_leds_verdes(PIO pio, uint sm) {
+    for (int i = 0; i < NUM_PIXELS; i++) {
+        uint32_t valor_led = matrix_rgb(0.0, 0.0, 0.5); 
+        pio_sm_put_blocking(pio, sm, valor_led);
+    }
+}
+
+//Função ligar Leds branco
+void ligar_leds_brancos(PIO pio, uint sm) {
+    for (int i = 0; i < NUM_PIXELS; i++) {
+        uint32_t valor_led = matrix_rgb(0.2, 0.2, 0.2); 
+        pio_sm_put_blocking(pio, sm, valor_led);
     }
 }
 
@@ -78,7 +121,7 @@ char leitura_teclado()
                 char tecla = teclado[linha][coluna]; // Mapeia a tecla pressionada
 
                 while (gpio_get(linhas[linha]) == 0){
-                    sleep_ms(10); // Aguarda a tecla ser liberada (debounce)
+                    sleep_ms(50); // Aguarda a tecla ser liberada (debounce)
                 }
                 gpio_put(colunas[coluna], 1); // Desativa a coluna atual
                 return tecla; // Retorna a tecla pressionada
@@ -141,26 +184,30 @@ void configurar_pino(int pino, bool direcao, bool estado) {
 
 
 //Função principal
-int main() {
-    PIO pio = pio0; 
+int main() { 
     bool ok;
     configurar_pino(MATRIZ_PIN, GPIO_OUT, false); //inicializa o pino do LED 
+    
+    gpio_init(button);
+    gpio_set_dir(button, GPIO_IN);
+    gpio_pull_up(button); // Ou gpio_pull_down(button) dependendo da sua configuração
+    gpio_set_irq_enabled_with_callback(button, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
+
 
     //Configuração do clock
     ok = set_sys_clock_khz(128000, false);
     stdio_init_all();
 
     //Configurações PIO
+    PIO pio = pio0;
     printf("iniciando a transmissão PIO");
-    uint offset = pio_add_program(pio, &ws2812_program);
+    uint offset = pio_add_program(pio, &ws2818b_program);
     uint sm = pio_claim_unused_sm(pio, true);
-    ws2812_program_init(pio, sm, offset, MATRIZ_PIN, 800000, false);
+    ws2818b_program_init(pio, sm, offset, MATRIZ_PIN,800000.f);
     if (ok) printf("clock set to %ld\n", clock_get_hz(clk_sys));
 
-    uint16_t i;
     uint32_t valor_led;
     double r = 0.0, b = 0.0 , g = 0.0;
-    char aux;
 
     //Inicializa os pinos da matriz
     for (int i = 0; i < 4; i++)
@@ -181,16 +228,13 @@ int main() {
     while (true) {
         char tecla = leitura_teclado();
 
-        if (tecla != '\0') {
+    sleep_ms(50); // Pequeno atraso para debounce
+    if(!gpio_get(button)){ // Verifica novamente
+        gerar_animacao(animacao_Bia, 5, 500, pio, sm);
+    }
+        if (tecla != '\0') { 
             printf("Tecla pressionada: %c\n", tecla);
-
-        // Lê a tecla pressionada
-        if (tecla == '*') {
-        printf("Reiniciando para modo de gravação...\n");
-        reset_usb_boot(0, 0);
-        }
-
-        } else { 
+            sleep_ms(50);
                 // Executa ações baseadas na tecla 
                 switch (tecla) {
                 case '1': 
@@ -224,15 +268,31 @@ int main() {
                     gerar_animacao(animacao_Bia, 5, 500, pio, sm); //Nome da aniimação, n de frames, fps , pio, sn
                     break;
                 case 'A':
+                    desligar_leds(pio, sm);
+                    break;
                 case 'B':
+                    ligar_leds_azul(pio, sm);
+                    break;
                 case 'C':
+                    ligar_leds_vermelho(pio, sm);
+                    break;
                 case 'D':
+                    ligar_leds_verdes(pio, sm);
+                    break;
                 case '#': 
+                    ligar_leds_brancos(pio, sm);
+                    break;
+                case '*':
+                    printf("Reiniciando para modo de gravação...\n");
+                    reset_usb_boot(0, 0);
                 default: break;
                 }
             sleep_ms(200); // Intervalo de tempo menor para uma leitura mais rápida
             }
      sleep_ms(150);
-    }
- return 0;//Teoricamente, nunca chega aqui por causa do loop infinito
+        }   
+    return 0;//Teoricamente, nunca chega aqui por causa do loop infinito
+    sleep_ms(10);
+
 }
+    
