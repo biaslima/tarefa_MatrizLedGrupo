@@ -148,6 +148,8 @@ void gerar_animacao(double animacao[][NUM_LEDS][3], int num_frames, int delay_ms
      putchar('\n');
      sleep_ms(delay_ms);
     }
+ npClear();
+ npWrite();
 }
 
 void buttonConfig(const uint BUTTON_PIN)
@@ -225,26 +227,26 @@ void desligarTodosOsLeds() {
 }
 void ligarLEDsAzuis() {
     for (int i = 0; i < NUM_LEDS; i++) {
-        definir_intensidade(correcao_index(i), 0.0, 0.0, 1.0);
+        definir_intensidade(i, 0.0, 0.0, 1.0);
     }
     npWrite();
 }
 void ligarLEDsVermelhos() {
     for (int i = 0; i < NUM_LEDS; i++) {
-        definir_intensidade(correcao_index(i), 0.8, 0.0, 0.0);
+        definir_intensidade(i, 0.8, 0.0, 0.0);
     }
     npWrite();
 }
 void ligarLEDsVerdes() {
     for (int i = 0; i < NUM_LEDS; i++) {
-        definir_intensidade(correcao_index(i), 0.0, 0.5, 0.0);
+        definir_intensidade(i, 0.0, 0.7, 0.0);
     }
     npWrite();
 }
 
 void ligarLEDsBrancos() {
     for (int i = 0; i < NUM_LEDS; i++) {
-        definir_intensidade(correcao_index(i), 0.2, 0.2, 0.2);
+        definir_intensidade(i, 0.2, 0.2, 0.2);
     }
     npWrite();
 }
@@ -643,9 +645,6 @@ int main() {
                     ligarLEDsBrancos();
                 default: break;
                 }
-             npClear();
-             npWrite();
-            sleep_ms(200); // Intervalo de tempo menor para uma leitura mais rápida
             }
      sleep_ms(150);
     }
