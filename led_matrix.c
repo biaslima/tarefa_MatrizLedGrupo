@@ -217,6 +217,38 @@ npLED_t leds[NUM_LEDS];
 PIO np_pio;
 uint sm;
 
+// Funções de teclas específicas
+void desligarTodosOsLeds() {
+   npClear();
+    npWrite();
+
+}
+void ligarLEDsAzuis() {
+    for (int i = 0; i < NUM_LEDS; i++) {
+        definir_intensidade(correcao_index(i), 0.0, 0.0, 1.0);
+    }
+    npWrite();
+}
+void ligarLEDsVermelhos() {
+    for (int i = 0; i < NUM_LEDS; i++) {
+        definir_intensidade(correcao_index(i), 0.8, 0.0, 0.0);
+    }
+    npWrite();
+}
+void ligarLEDsVerdes() {
+    for (int i = 0; i < NUM_LEDS; i++) {
+        definir_intensidade(correcao_index(i), 0.0, 0.5, 0.0);
+    }
+    npWrite();
+}
+
+void ligarLEDsBrancos() {
+    for (int i = 0; i < NUM_LEDS; i++) {
+        definir_intensidade(correcao_index(i), 0.2, 0.2, 0.2);
+    }
+    npWrite();
+}
+
 //Animações
 //A 1ª dimensao é os frames, a 2ª o índice do LED, a 3ª a cor (RGB)
  double animacao_Bia[5][NUM_LEDS][3]={
@@ -280,8 +312,6 @@ uint sm;
             {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}
         }
  };
-
-
 
 
 //Função principal
@@ -350,10 +380,19 @@ int main() {
                     gerar_animacao(animacao_Bia, 5, 500); //Nome da aniimação, n de frames, fps , pio, sn
                     break;
                 case 'A':
+                    desligarTodosOsLeds();
+                    break;
                 case 'B':
+                    ligarLEDsAzuis();
+                    break;
                 case 'C':
+                    ligarLEDsVermelhos();
+                    break;
                 case 'D':
+                    ligarLEDsVerdes();
+                    break;
                 case '#': 
+                    ligarLEDsBrancos();
                 default: break;
                 }
              npClear();
